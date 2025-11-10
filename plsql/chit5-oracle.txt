@@ -1,0 +1,36 @@
+SET SERVEROUTPUT ON;
+
+DECLARE
+    CURSOR PARAM_CURSOR (roll_no NUMBER) IS
+        SELECT ROLLNO, NAME, ATT_DATE, ATTENDANCE
+        FROM O_ROLLCALL
+        WHERE ROLLNO = roll_no;
+
+    tmp PARAM_CURSOR%ROWTYPE;
+
+BEGIN
+    FOR tmp_row IN (SELECT ROLLNO FROM O_ROLLCALL) LOOP
+        OPEN PARAM_CURSOR(tmp_row.ROLLNO);
+        FETCH PARAM_CURSOR INTO tmp;
+
+        IF PARAM_CURSOR%FOUND THEN
+            BEGIN
+                MERGE INTO N_ROLLCALL T1
+                USING (SELECT tmp.ROLLNO AS ROLLNO, tmp.NAME AS NAME, tmp.ATT_DATE AS ATT_DATE, tmp.ATTENDANCE AS ATTENDANCE FROM dual) T2
+                ON (T1.ROLLNO = T2.ROLLNO)
+                WHEN NOT MATCHED THEN
+                    INSERT (ROLLNO, NAME, ATT_DATE, ATTENDANCE)
+                    VALUES (T2.ROLLNO, T2.NAME, T2.ATT_DATE, T2.ATTENDANCE);
+
+                IF SQL%ROWCOUNT > 0 THEN
+                    dbms_output.put_line('Merged record with ROLLNO: ' || tmp.ROLLNO);
+                ELSE
+                    dbms_output.put_line('Skipped record with ROLLNO: ' || tmp.ROLLNO || ' (Already Exists)');
+                END IF;
+            END;
+        END IF;
+
+        CLOSE PARAM_CURSOR;
+    END LOOP;
+END;
+/

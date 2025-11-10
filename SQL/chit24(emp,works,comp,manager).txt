@@ -1,0 +1,113 @@
+-- ============================================
+-- Create Database (optional)
+-- ============================================
+CREATE DATABASE companyDB;
+USE companyDB;
+
+-- ============================================
+-- Create Tables
+-- ============================================
+
+-- Emp Table
+CREATE TABLE Emp (
+    emp_id INT PRIMARY KEY,
+    ename VARCHAR(50),
+    street VARCHAR(100),
+    city VARCHAR(50)
+);
+
+-- Company Table
+CREATE TABLE Company (
+    c_id INT PRIMARY KEY,
+    cname VARCHAR(50),
+    city VARCHAR(50)
+);
+
+-- Works Table
+CREATE TABLE Works (
+    emp_id INT,
+    c_id INT,
+    ename VARCHAR(50),
+    cname VARCHAR(50),
+    sal DECIMAL(10,2),
+    PRIMARY KEY (emp_id, c_id),
+    FOREIGN KEY (emp_id) REFERENCES Emp(emp_id),
+    FOREIGN KEY (c_id) REFERENCES Company(c_id)
+);
+
+-- Manager Table
+CREATE TABLE Manager (
+    mgr_id INT PRIMARY KEY,
+    mgrname VARCHAR(50),
+    emp_id INT,
+    FOREIGN KEY (emp_id) REFERENCES Emp(emp_id)
+);
+
+-- ============================================
+-- Insert Sample Data
+-- ============================================
+
+-- Emp table data
+INSERT INTO Emp (emp_id, ename, street, city) VALUES
+(1, 'John Doe', '123 Maple St', 'New York'),
+(2, 'Jane Smith', '456 Oak St', 'Los Angeles'),
+(3, 'Sam Wilson', '789 Pine St', 'Chicago');
+
+-- Company table data
+INSERT INTO Company (c_id, cname, city) VALUES
+(1, 'ABC', 'Mumbai'),
+(2, 'Mbank', 'Delhi'),
+(3, 'Bosch', 'Pune'),
+(4, 'SBC', 'Hyderabad');
+
+-- Works table data
+INSERT INTO Works (emp_id, c_id, ename, cname, sal) VALUES
+(1, 1, 'John Doe', 'ABC', 60000),
+(2, 2, 'Jane Smith', 'Mbank', 55000),
+(3, 3, 'Sam Wilson', 'Bosch', 45000);
+
+-- Manager table data
+INSERT INTO Manager (mgr_id, mgrname, emp_id) VALUES
+(1, 'Alice', 1),
+(2, 'Bob', 2);
+
+-- ============================================
+-- Required Operations
+-- ============================================
+
+-- i. Modify the database so that a particular company (eg. ABC) now in Pune
+UPDATE Company
+SET city = 'Pune'
+WHERE cname = 'ABC';
+
+-- ii. Give all managers of Mbank a 10% raise.
+-- If salary is > 20000, give only 3% raise.
+UPDATE Works
+SET sal = CASE
+    WHEN sal > 20000 THEN sal * 1.03
+    ELSE sal * 1.10
+END
+WHERE cname = 'Mbank' 
+AND emp_id IN (SELECT emp_id FROM Manager);
+
+-- iii. Find out the names of all the employees who work in ‘Bosch’ company in city Pune
+SELECT ename
+FROM Works
+WHERE c_id IN (
+    SELECT c_id 
+    FROM Company 
+    WHERE cname = 'Bosch' AND city = 'Pune'
+);
+
+-- iv. Delete all records in the Works table for employees of a particular company (Eg. SBC)
+-- whose salary > 50000
+DELETE FROM Works
+WHERE cname = 'SBC' AND sal > 50000;
+
+-- ============================================
+-- View Final Tables (Optional)
+-- ============================================
+SELECT * FROM Company;
+SELECT * FROM Works;
+SELECT * FROM Emp;
+SELECT * FROM Manager;

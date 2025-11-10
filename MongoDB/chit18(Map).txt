@@ -1,0 +1,52 @@
+use mydb
+
+db.createCollection("city")
+
+db.city.insertMany([
+  { city: "Pune", type: "urban", state: "MH", population: "5600000" },
+  { city: "Mumbai", type: "urban", state: "MH", population: "12442373" },
+  { city: "Nagpur", type: "urban", state: "MH", population: "2400000" },
+  { city: "Nashik", type: "urban", state: "MH", population: "2000000" },
+  { city: "Aurangabad", type: "urban", state: "MH", population: "1200000" },
+  { city: "Delhi", type: "urban", state: "DL", population: "16787941" },
+  { city: "Bengaluru", type: "urban", state: "KA", population: "8443675" },
+  { city: "Chennai", type: "urban", state: "TN", population: "4646732" },
+  { city: "Kolkata", type: "urban", state: "WB", population: "4496694" },
+  { city: "Hyderabad", type: "urban", state: "TG", population: "6809970" }
+]);
+
+Statewise Population using MapReduce
+mapState = function() {
+  emit(this.state, this.population);
+}
+
+reduceState = function(key, values) {
+  return Array.sum(values);
+}
+
+db.city.mapReduce(mapState, reduceState, { out: "statewise_population" })
+
+Citywise Population using MapReduce
+
+mapCity = function() {
+  emit(this.city, this.population);
+}
+
+reduceCity = function(key, values) {
+  return Array.sum(values);
+}
+
+db.city.mapReduce(mapCity, reduceCity, { out: "citywise_population" })
+
+
+Typewise Population using MapReduce
+
+mapType = function() {
+  emit(this.type, this.population);
+}
+
+reduceType = function(key, values) {
+  return Array.sum(values);
+}
+
+db.city.mapReduce(mapType, reduceType, { out: "typewise_population" })

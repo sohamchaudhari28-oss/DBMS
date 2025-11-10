@@ -1,0 +1,81 @@
+CREATE DATABASE pqr;
+USE pqr;
+
+CREATE TABLE N_RollCall (
+  Roll INT,
+  Name VARCHAR(255)
+);
+
+CREATE TABLE O_RollCall (
+  Roll INT,
+  Name VARCHAR(255)
+);
+
+INSERT INTO N_RollCall (Roll, Name)
+VALUES
+  (1, 'John'),
+  (2, 'Mary'),
+  (3, 'David'),
+  (4, 'Emily');
+
+INSERT INTO O_RollCall (Roll, Name)
+VALUES
+  (1, 'John'),
+  (2, 'Mary'),
+  (5, 'Michael'),
+  (6, 'Sarah');
+  
+DELIMITER //
+
+CREATE PROCEDURE merge()
+BEGIN
+  DECLARE done INT DEFAULT FALSE;
+  DECLARE a INT;
+  DECLARE a1 VARCHAR(255);
+  DECLARE b INT;
+  DECLARE exist INT DEFAULT 0;
+
+  DECLARE c1 CURSOR FOR SELECT Roll, Name FROM N_RollCall;
+  DECLARE c2 CURSOR FOR SELECT Roll FROM O_RollCall;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  OPEN c1;
+
+  loop1: LOOP
+    FETCH c1 INTO a, a1;
+    IF done THEN
+      LEAVE loop1;
+    END IF;
+    
+    SET exist = 0; -- Reset exists flag for each new record from N_RollCall
+    SET done = FALSE; -- Reset done for the inner loop
+    OPEN c2;
+
+    loop2: LOOP
+      FETCH c2 INTO b;
+      IF done THEN
+        LEAVE loop2; -- Exit the inner loop if end of c2 is reached
+      END IF;
+
+      IF a = b THEN
+        SET exist = 1; -- Mark as existing if a match is found
+        LEAVE loop2; -- Exit inner loop if match found
+      END IF;
+    END LOOP;
+
+    CLOSE c2; -- Close the second cursor after inner loop
+
+    IF exist = 0 THEN
+      -- Insert only if the Roll does not exist in O_RollCall
+      INSERT INTO O_RollCall (Roll, Name) VALUES (a, a1);
+    END IF;
+
+  END LOOP;
+
+  CLOSE c1; -- Close the first cursor after the outer loop
+END //
+
+DELIMITER ;
+CALL merge();
+
+SELECT * FROM O_RollCall;

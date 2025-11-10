@@ -1,0 +1,46 @@
+1. Create the emp table with specified fields and constraints
+sql
+Copy code
+CREATE TABLE emp (
+    Eno INT PRIMARY KEY AUTO_INCREMENT,  -- Auto Increment serves as the sequence starting from 101
+    Ename VARCHAR(100) NOT NULL,
+    Address VARCHAR(255) DEFAULT 'Nashik',
+    Joindate DATE
+);
+
+-- The `Eno` field will automatically start from 101 due to AUTO_INCREMENT setting.
+-- However, we need to set the starting point for AUTO_INCREMENT explicitly, which can be done like this:
+ALTER TABLE emp AUTO_INCREMENT = 101;
+2. Add the Post field to the emp table
+sql
+Copy code
+ALTER TABLE emp ADD COLUMN Post VARCHAR(100);
+3. Insert some data into the emp table
+sql
+Copy code
+INSERT INTO emp (Ename, Address, Joindate, Post) VALUES
+('John Doe', 'Pune', '2024-01-15', 'Manager'),
+('Alice Smith', 'Mumbai', '2023-06-23', 'Developer'),
+('Bob Johnson', 'Delhi', '2022-11-10', 'Analyst'),
+('Mary Lee', 'Bengaluru', '2021-03-25', 'HR');
+4. Create an index on the Ename field of the emp table
+sql
+Copy code
+CREATE INDEX idx_ename ON emp(Ename);
+5. Create a view on the emp table to show only Ename and Salary
+(Note: The emp table needs a Salary column to include it in the view. Let's assume the Salary field exists, or you can add it before creating the view.)
+
+sql
+Copy code
+-- First, add the Salary field if it's not already present
+ALTER TABLE emp ADD COLUMN Salary DECIMAL(10, 2);
+
+-- Insert some sample salary data for demonstration
+UPDATE emp SET Salary = 50000 WHERE Ename = 'John Doe';
+UPDATE emp SET Salary = 40000 WHERE Ename = 'Alice Smith';
+UPDATE emp SET Salary = 45000 WHERE Ename = 'Bob Johnson';
+UPDATE emp SET Salary = 55000 WHERE Ename = 'Mary Lee';
+
+-- Create the view to show Ename and Salary only
+CREATE VIEW emp_view AS
+SELECT Ename, Salary FROM emp;

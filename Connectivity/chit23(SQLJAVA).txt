@@ -1,0 +1,203 @@
+Perfect! Let’s go **step by step from scratch** for running the **Java + MySQL JDBC program** on **Ubuntu**. I’ll guide you from installing everything to running the program successfully.
+
+---
+
+# **Step 1: Install Java JDK**
+
+1. Open terminal.
+2. Update packages:
+
+```bash
+sudo apt update
+```
+
+3. Install OpenJDK:
+
+```bash
+sudo apt install openjdk-20-jdk
+```
+
+4. Verify installation:
+
+```bash
+java -version
+```
+
+You should see something like: `openjdk version "20"`
+
+---
+
+# **Step 2: Install MySQL Server**
+
+1. Install MySQL server:
+
+```bash
+sudo apt install mysql-server
+```
+
+2. Secure MySQL installation (set root password etc.):
+
+```bash
+sudo mysql_secure_installation
+```
+
+3. Login to MySQL:
+
+```bash
+sudo mysql -u root -p
+```
+
+4. Create a database for your program:
+
+```sql
+CREATE DATABASE CompanyDB;
+USE CompanyDB;
+```
+
+5. (Optional) Create a separate MySQL user if you don’t want to use root:
+
+```sql
+CREATE USER 'javauser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON CompanyDB.* TO 'javauser'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+---
+
+# **Step 3: Install MySQL Workbench (Optional)**
+
+```bash
+sudo apt install mysql-workbench
+```
+
+You can use it to **view tables** and **run queries** graphically.
+
+---
+
+# **Step 4: Download MySQL Connector/J**
+
+1. Go to: [https://dev.mysql.com/downloads/connector/j/](https://dev.mysql.com/downloads/connector/j/)
+2. Download the `.tar.gz` or `.zip` file and extract it.
+3. Locate `mysql-connector-java-8.x.x.jar`. We will use this in the classpath when compiling/running Java.
+
+---
+
+# **Step 5: Create Java Program**
+
+1. Open any text editor (VSCode, nano, gedit).
+2. Create file `EmployeeDB.java` and paste this code:
+
+```java
+import java.sql.*;
+import java.util.Scanner;
+
+public class EmployeeDB {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/CompanyDB";
+        String user = "root";        // Or your MySQL username
+        String password = "yourpassword";
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url, user, password);
+            Statement stmt = con.createStatement();
+            Scanner sc = new Scanner(System.in);
+
+            // i. Create table
+            String createTable = "CREATE TABLE IF NOT EXISTS Employee (" +
+                    "SSN INT PRIMARY KEY, " +
+                    "Ename VARCHAR(50) NOT NULL, " +
+                    "State VARCHAR(50), " +
+                    "Salary DOUBLE)";
+            stmt.executeUpdate(createTable);
+            System.out.println("Table Employee created successfully.");
+
+            // ii. Insert records
+            stmt.executeUpdate("INSERT INTO Employee VALUES(101, 'Amit', 'MH', 50000)");
+            stmt.executeUpdate("INSERT INTO Employee VALUES(102, 'Sneha', 'TN', 60000)");
+            stmt.executeUpdate("INSERT INTO Employee VALUES(103, 'Rahul', 'Gujrat', 55000)");
+            stmt.executeUpdate("INSERT INTO Employee VALUES(104, 'Priya', 'MH', 45000)");
+            System.out.println("Records inserted successfully.");
+
+            // iii. Retrieve based on SSN
+            System.out.print("Enter SSN to search: ");
+            int ssn = sc.nextInt();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Employee WHERE SSN=" + ssn);
+            if(rs.next()) {
+                System.out.println("SSN: " + rs.getInt("SSN"));
+                System.out.println("Name: " + rs.getString("Ename"));
+                System.out.println("State: " + rs.getString("State"));
+                System.out.println("Salary: " + rs.getDouble("Salary"));
+            } else {
+                System.out.println("No employee found with SSN " + ssn);
+            }
+
+            // iv. Update state from 'MH' to 'TN'
+            int rowsUpdated = stmt.executeUpdate("UPDATE Employee SET State='TN' WHERE State='MH'");
+            System.out.println("Rows updated: " + rowsUpdated);
+
+            // v. Delete employees from Gujarat
+            int rowsDeleted = stmt.executeUpdate("DELETE FROM Employee WHERE State='Gujrat'");
+            System.out.println("Rows deleted: " + rowsDeleted);
+
+            // Display all employees
+            System.out.println("\nAll Employees:");
+            rs = stmt.executeQuery("SELECT * FROM Employee");
+            while(rs.next()) {
+                System.out.println(rs.getInt("SSN") + " " + rs.getString("Ename") + " " +
+                        rs.getString("State") + " " + rs.getDouble("Salary"));
+            }
+
+            rs.close();
+            stmt.close();
+            con.close();
+            sc.close();
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+---
+
+# **Step 6: Compile and Run Java Program**
+
+1. Open terminal where `EmployeeDB.java` and `mysql-connector-java-8.x.x.jar` are located.
+2. Compile with **classpath**:
+
+```bash
+javac -cp .:mysql-connector-java-8.x.x.jar EmployeeDB.java
+```
+
+3. Run program:
+
+```bash
+java -cp .:mysql-connector-java-8.x.x.jar EmployeeDB
+```
+
+> **Note:** Replace `mysql-connector-java-8.x.x.jar` with your actual JAR filename.
+
+---
+
+# **Step 7: Program Execution**
+
+* Program will:
+
+  1. Create the table (if not exists)
+  2. Insert sample records
+  3. Ask you to enter **SSN** to retrieve a record
+  4. Update all employees with `State='MH'` → `TN`
+  5. Delete employees from Gujarat
+  6. Display all remaining records
+
+---
+
+✅ At this point, your **Two-Tier Java + MySQL program** will run perfectly on Ubuntu.
+
+---
+
+If you want, I can also create a **step-by-step diagram showing how Two-Tier JDBC architecture works with this example**, which is super useful for viva.
+
+Do you want me to do that?

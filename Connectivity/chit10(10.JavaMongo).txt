@@ -1,0 +1,216 @@
+Perfect! Let’s go **step by step**, starting from a **Linux environment setup** to writing a **Java application** that connects to MongoDB and performs all the operations you mentioned. I’ll guide you in a **practical, exam-ready way**.
+
+---
+
+# **Step 1: Install MongoDB on Linux**
+
+1. **Update packages:**
+
+```bash
+sudo apt update
+```
+
+2. **Install MongoDB (Ubuntu example):**
+
+```bash
+sudo apt install -y mongodb
+```
+
+3. **Start MongoDB service:**
+
+```bash
+sudo systemctl start mongodb
+sudo systemctl enable mongodb
+```
+
+4. **Check if MongoDB is running:**
+
+```bash
+sudo systemctl status mongodb
+```
+
+5. **Run Mongo Shell to test:**
+
+```bash
+mongo
+```
+
+* You should see the Mongo shell prompt.
+
+---
+
+# **Step 2: Install Java (OpenJDK) on Linux**
+
+1. **Install Java:**
+
+```bash
+sudo apt install openjdk-17-jdk -y
+```
+
+2. **Check Java version:**
+
+```bash
+java -version
+```
+
+---
+
+# **Step 3: Create a Java Project**
+
+1. Create a folder for your project:
+
+```bash
+mkdir MongoJavaApp
+cd MongoJavaApp
+```
+
+2. Initialize a Maven project (recommended for dependencies):
+
+```bash
+mvn archetype:generate -DgroupId=com.institute -DartifactId=MongoJavaApp -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+cd MongoJavaApp
+```
+
+---
+
+# **Step 4: Add MongoDB Java Driver Dependency**
+
+Edit `pom.xml` and add the **MongoDB Java driver** dependency inside `<dependencies>`:
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>org.mongodb</groupId>
+        <artifactId>mongodb-driver-sync</artifactId>
+        <version>4.11.1</version>
+    </dependency>
+</dependencies>
+```
+
+> Save and run:
+
+```bash
+mvn clean install
+```
+
+---
+
+# **Step 5: Java Code for MongoDB Operations**
+
+Create `MongoExample.java` inside `src/main/java/com/institute/`:
+
+```java
+package com.institute;
+
+import com.mongodb.client.*;
+import org.bson.Document;
+
+import static com.mongodb.client.model.Filters.eq;
+
+public class MongoExample {
+    public static void main(String[] args) {
+        // 1. Connect to MongoDB
+        MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+
+        // 2. Create Database
+        MongoDatabase database = mongoClient.getDatabase("InstituteDB");
+        System.out.println("Database created: " + database.getName());
+
+        // 3. Create Collection
+        MongoCollection<Document> students = database.getCollection("Student");
+        System.out.println("Collection: " + students.getNamespace());
+
+        // 4. Insert Document
+        Document doc1 = new Document("RollNo", 1)
+                .append("Name", "Amit")
+                .append("Age", 20)
+                .append("Branch", "Computer")
+                .append("Address", new Document("City", "Pune").append("State", "MH"))
+                .append("Hobbies", new String[]{"Cricket","Reading"});
+        students.insertOne(doc1);
+        System.out.println("Document inserted");
+
+        // Insert multiple documents
+        Document doc2 = new Document("RollNo", 2).append("Name", "Sneha").append("Age", 21)
+                .append("Branch", "IT")
+                .append("Address", new Document("City", "Mumbai").append("State", "MH"))
+                .append("Hobbies", new String[]{"Painting","Swimming"});
+        Document doc3 = new Document("RollNo", 3).append("Name", "Rahul").append("Age", 22)
+                .append("Branch", "Mechanical")
+                .append("Address", new Document("City", "Pune").append("State", "MH"))
+                .append("Hobbies", new String[]{"Football"});
+        students.insertMany(java.util.Arrays.asList(doc2, doc3));
+        System.out.println("Multiple documents inserted");
+
+        // 5. Display Data
+        System.out.println("Documents in collection:");
+        FindIterable<Document> docs = students.find();
+        for (Document d : docs) {
+            System.out.println(d.toJson());
+        }
+
+        // 6. Update Document
+        students.updateOne(eq("RollNo", 2), new Document("$set", new Document("Age", 23)));
+        System.out.println("Document updated");
+
+        // 7. Remove Document
+        students.deleteOne(eq("RollNo", 3));
+        System.out.println("Document deleted");
+
+        // Close connection
+        mongoClient.close();
+    }
+}
+```
+
+---
+
+# **Step 6: Run Your Java Program**
+
+1. Compile:
+
+```bash
+mvn compile
+```
+
+2. Run:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.institute.MongoExample"
+```
+
+✅ You should see:
+
+* Database creation message
+* Collection creation message
+* Documents inserted, displayed, updated, and deleted
+
+---
+
+# **Step 7: Verify in MongoDB Shell**
+
+```bash
+mongo
+use InstituteDB
+db.Student.find().pretty()
+```
+
+* You will see remaining documents and updates reflected.
+
+---
+
+# **Notes for Viva**
+
+1. `MongoClients.create("mongodb://localhost:27017")` → Connects Java to MongoDB
+2. `getDatabase()` → Creates/gets database
+3. `getCollection()` → Creates/gets collection
+4. `insertOne()` & `insertMany()` → Inserts documents
+5. `find()` → Display documents
+6. `updateOne()` → Updates a document
+7. `deleteOne()` → Deletes a document
+
+---
+
+If you want, I can also **give you the same Java code but with aggregation queries like `$group`, `$sort`, `$limit`** so you can show advanced operations in your viva.
+
+Do you want me to do that?

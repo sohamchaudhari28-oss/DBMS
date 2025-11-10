@@ -1,0 +1,17 @@
+CREATE OR REPLACE TRIGGER LIB_TRIGGER 
+BEFORE UPDATE OF BOOK_NAME,DOI,DOR,ID_NO,NAME OR DELETE ON LIBRARY 
+REFERENCING OLD AS O NEW AS N 
+FOR EACH ROW 
+DECLARE
+operation_type varchar(20);
+ts date;
+BEGIN
+  if deleting 
+    then operation_type:='DELETE';
+  else 
+    operation_type:='UPDATE';
+  end if;
+  ts:=sysdate;
+  
+  insert into LIBRARY_AUDIT(ID_NO,NAME,BOOK_NAME,OPERATION_TYPE,TIMESTAMP) values (:O.ID_NO,:O.NAME,:O.BOOK_NAME,operation_type,ts);
+END;

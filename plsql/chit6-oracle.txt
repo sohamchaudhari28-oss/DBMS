@@ -1,0 +1,64 @@
+CREATE OR REPLACE PROCEDURE PROC_GRADE AS
+    
+    rno NUMBER;
+    nm VARCHAR2(20);
+    mrk NUMBER;
+    
+    CURSOR c1 IS SELECT ROLL, NAME, TOTAL_MARKS FROM STUDMARKS;
+    
+BEGIN
+    
+    OPEN c1;
+    
+        LOOP
+        FETCH c1 INTO rno, nm, mrk;
+        EXIT WHEN c1%NOTFOUND;
+        
+        
+        IF (mrk <= 1500 AND mrk >= 990) THEN
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'Distinction');
+        
+        ELSIF (mrk <= 989 AND mrk >= 900) THEN
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'First Class');
+        
+        ELSIF (mrk <= 899 AND mrk >= 825) THEN
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'Higher Second Class');
+        
+        ELSE
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'Fail');
+        END IF;
+        
+    END LOOP;
+    
+        CLOSE c1;
+END PROC_GRADE;
+/
+
+
+----------
+
+CREATE OR REPLACE PROCEDURE PROC_GRADE AS
+rno number;
+nm varchar(20);
+mrk number;
+cursor c1 is select ROLL,NAME,MARKS from
+STUDMARKS;
+BEGIN
+ open c1;
+ loop
+
+ fetch c1 into rno,nm,mrk;
+ exit when c1%NOTFOUND;
+ if (mrk <=1500 and mrk>=990) then
+ insert into RESULT values(rno,nm,'Distinction');
+ elsif (mrk <=989 and mrk>=900) then
+ insert into RESULT values(rno,nm,'First class');
+ elsif( mrk <=899 and mrk>=825) then
+ insert into RESULT values(rno,nm,'Higher Second
+class');
+ else
+ insert into RESULT values(rno,nm,'Fail');
+ end if;
+ end loop;
+ close c1;
+END PROC_GRADE;

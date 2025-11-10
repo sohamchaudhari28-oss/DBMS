@@ -1,0 +1,90 @@
+CREATE OR REPLACE FUNCTION PROC_GRADE12
+RETURN NUMBER AS
+    rno NUMBER;
+    nm VARCHAR2(20);
+    mrk NUMBER;
+    
+    CURSOR c1 IS SELECT ROLL, NAME, MARKS FROM STUDMARKS;
+    
+    PRAGMA AUTONOMOUS_TRANSACTION;
+    
+BEGIN
+   
+    OPEN c1;
+    
+    -- Loop through each record in the cursor
+    LOOP
+        FETCH c1 INTO rno, nm, mrk;
+        EXIT WHEN c1%NOTFOUND;
+        
+        -- Categorize students based on marks and insert into RESULT table
+        IF (mrk <= 1500 AND mrk >= 990) THEN
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'Distinction');
+        
+        ELSIF (mrk <= 989 AND mrk >= 900) THEN
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'First Class');
+        
+        ELSIF (mrk <= 899 AND mrk >= 825) THEN
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'Higher Second Class');
+        
+        ELSE
+            INSERT INTO RESULT (ROLL, NAME, CLASS) VALUES (rno, nm, 'Fail');
+        END IF;
+        
+        -- Commit the insert for each row
+        COMMIT;
+    END LOOP;
+    
+    -- Close the cursor
+    CLOSE c1;
+    
+    -- Return 0 as a success indicator
+    RETURN 0;
+END PROC_GRADE12;
+/
+
+
+----
+Running the Function
+DECLARE
+    result NUMBER;
+BEGIN
+    result := PROC_GRADE12;
+END;
+/
+
+
+----
+
+CREATE OR REPLACE FUNCTION PROC_GRADE12
+RETURN number AS
+rno number;
+nm varchar(20);
+mrk number;
+cursor c1 is select ROLL,NAME,MARKS from
+STUDMARKS;
+ PRAGMA AUTONOMOUS_TRANSACTION;
+BEGIN
+open c1;
+ loop
+
+ fetch c1 into rno,nm,mrk;
+ exit when c1%NOTFOUND;
+ if (mrk <=1500 and mrk>=990) then
+ insert into RESULT values(rno,nm,'Distinction');
+ commit;
+ elsif (mrk <=989 and mrk>=900) then
+ insert into RESULT values(rno,nm,'First class');
+ commit;
+ elsif( mrk <=899 and mrk>=825) then
+ insert into RESULT values(rno,nm,'Higher Second
+class');
+ commit;
+ else
+ insert into RESULT values(rno,nm,'Fail');
+ commit;
+ end if;
+ end loop;
+ close c1;
+ return 0;
+END PROC_GRADE12;
