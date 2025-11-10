@@ -1,0 +1,98 @@
+﻿CHIT 23 - MySQL Java Two-tier Employee
+
+
+-- 1. Create Employee table
+CREATE TABLE Employee (
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(50),
+    salary DECIMAL(10, 2),
+    department VARCHAR(50)
+);
+
+
+-- Sample data
+INSERT INTO Employee VALUES (1, 'John Doe', 50000.00, 'IT');
+INSERT INTO Employee VALUES (2, 'Jane Smith', 60000.00, 'HR');
+INSERT INTO Employee VALUES (3, 'Bob Johnson', 55000.00, 'IT');
+
+
+-- 2. Java JDBC Code for Employee Operations
+
+
+import java.sql.*;
+
+
+public class EmployeeDatabase {
+    
+    // Database connection parameters
+    static final String DB_URL = "jdbc:mysql://localhost:3306/company";
+    static final String USER = "root";
+    static final String PASS = "password";
+    
+    public static void main(String[] args) {
+        Connection conn = null;
+        Statement stmt = null;
+        
+        try {
+            // Register JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            
+            // Open a connection
+            System.out.println("Connecting to database...");
+            conn = DriverManager.getConnection(DB_URL, USER, PASS);
+            
+            // Create statement
+            stmt = conn.createStatement();
+            
+            // INSERT operation
+            String sqlInsert = "INSERT INTO Employee VALUES (4, 'Alice Brown', 58000.00, 'Finance')";
+            stmt.executeUpdate(sqlInsert);
+            System.out.println("Record inserted successfully");
+            
+            // SELECT operation
+            String sqlSelect = "SELECT * FROM Employee";
+            ResultSet rs = stmt.executeQuery(sqlSelect);
+            
+            System.out.println("\nEmployee Records:");
+            while(rs.next()) {
+                int id = rs.getInt("emp_id");
+                String name = rs.getString("emp_name");
+                double salary = rs.getDouble("salary");
+                String dept = rs.getString("department");
+                
+                System.out.println("ID: " + id + ", Name: " + name + 
+                                   ", Salary: " + salary + ", Department: " + dept);
+            }
+            
+            // UPDATE operation
+            String sqlUpdate = "UPDATE Employee SET salary = 65000.00 WHERE emp_id = 2";
+            stmt.executeUpdate(sqlUpdate);
+            System.out.println("\nRecord updated successfully");
+            
+            // DELETE operation
+            String sqlDelete = "DELETE FROM Employee WHERE emp_id = 4";
+            stmt.executeUpdate(sqlDelete);
+            System.out.println("Record deleted successfully");
+            
+            // Close resources
+            rs.close();
+            stmt.close();
+            conn.close();
+            
+        } catch(SQLException se) {
+            se.printStackTrace();
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(stmt != null) stmt.close();
+            } catch(SQLException se2) {}
+            try {
+                if(conn != null) conn.close();
+            } catch(SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        System.out.println("\nDatabase operations completed!");
+    }
+}

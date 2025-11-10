@@ -1,0 +1,56 @@
+﻿Chit 14 — MongoDB queries (Teachers, Department, Students)
+
+
+1. Create collections and insert sample documents:
+
+
+db.Teachers.insertMany([
+    { Tname: "Mr A", dno: 2, Experience: 10, Salary: 15000, Date_of_Joining: ISODate("2015-06-01") },
+    { Tname: "Ms B", dno: 2, Experience: 5, Salary: 12000, Date_of_Joining: ISODate("2018-08-15") }
+]);
+
+
+db.Department.insertMany([
+    { Dno: 1, Dname: "CS" },
+    { Dno: 2, Dname: "IT" }
+]);
+
+
+db.Students.insertMany([
+    { Sname: "xyz", Roll_No: 2, Class: "FE" },
+    { Sname: "abc", Roll_No: 5, Class: "SE" }
+]);
+
+
+2. Find teachers of dno = 2 and salary >= 10000:
+
+
+db.Teachers.find({ dno: 2, Salary: { $gte: 10000 } });
+
+
+3. Find student info having Roll_no = 2 OR Sname = 'xyz':
+
+
+db.Students.find({ $or: [{ Roll_No: 2 }, { Sname: 'xyz' }] });
+
+
+4. Update student name whose Roll_No=5:
+
+
+db.Students.updateOne({ Roll_No: 5 }, { $set: { Sname: 'NewName' } });
+
+
+5. Delete all students whose Class is 'FE':
+
+
+db.Students.deleteMany({ Class: 'FE' });
+
+
+6. Apply index on Students:
+
+
+db.Students.createIndex({ Roll_No: 1 });
+
+
+// Show indexes:
+db.Students.getIndexes();

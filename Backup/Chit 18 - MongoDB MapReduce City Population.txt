@@ -1,0 +1,57 @@
+﻿Chit 18 — MongoDB mapReduce on city collection
+
+
+Sample document:
+{
+    city: "pune",
+    type: "urban",
+    state: "MH",
+    population: 5600000
+}
+
+
+MapReduce examples:
+
+
+Statewise population:
+
+
+var mapState = function() {
+    emit(this.state, this.population);
+};
+
+
+var reduceSum = function(key, values) {
+    return Array.sum(values);
+};
+
+
+db.city.mapReduce(mapState, reduceSum, { out: "state_pop" });
+db.state_pop.find();
+
+
+Citywise population:
+
+
+var mapCity = function() {
+    emit(this.city, this.population);
+};
+
+
+db.city.mapReduce(mapCity, reduceSum, { out: "city_pop" });
+db.city_pop.find();
+
+
+Typewise population:
+
+
+var mapType = function() {
+    emit(this.type, this.population);
+};
+
+
+db.city.mapReduce(mapType, reduceSum, { out: "type_pop" });
+db.type_pop.find();
+
+
+Note: Aggregation pipelines with $group are preferred in modern MongoDB, but mapReduce satisfies the requirement.

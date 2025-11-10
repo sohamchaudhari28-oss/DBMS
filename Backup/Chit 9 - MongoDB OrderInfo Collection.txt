@@ -1,0 +1,51 @@
+﻿Chit 9 — MongoDB (collection orderinfo)
+
+
+Sample document:
+{
+    cust_id: 123,
+    cust_name: "abc",
+    status: "A",
+    price: 250
+}
+
+
+i. Find average price for each customer having status 'A':
+
+
+db.orderinfo.aggregate([
+    { $match: { status: "A" } },
+    { $group: {
+        _id: "$cust_id",
+        avgPrice: { $avg: "$price" }
+    }}
+]);
+
+
+ii. Display status of customers whose price between 100 and 1000:
+
+
+db.orderinfo.find(
+    { price: { $gte: 100, $lte: 1000 } },
+    { status: 1, _id: 0 }
+);
+
+
+iii. Display customers information without _id:
+
+
+db.orderinfo.find({}, { _id: 0 });
+
+
+iv. Create a simple index on orderinfo and fire query:
+
+
+db.orderinfo.createIndex({ cust_id: 1 });
+
+
+// Example query using index:
+db.orderinfo.find({ cust_id: 123 });
+
+
+// To see index info:
+db.orderinfo.getIndexes();

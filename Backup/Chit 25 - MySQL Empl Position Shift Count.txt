@@ -1,0 +1,128 @@
+﻿-- =====================================================
+-- 🧾 CHIT 25 — Employee, Position, Shift, and Salary Analysis
+-- =====================================================
+
+CREATE DATABASE empl_shift_db;
+USE empl_shift_db;
+
+
+-- Employee table
+CREATE TABLE Empl (
+    empno INT PRIMARY KEY,
+    ename VARCHAR(50),
+    job VARCHAR(30),
+    mgr INT,
+    sal DECIMAL(10, 2),
+    deptno INT
+);
+
+-- Insert sample employees
+INSERT INTO Empl VALUES 
+(101, 'John Smith', 'Manager', NULL, 75000, 10),
+(102, 'Jane Doe', 'Analyst', 101, 55000, 10),
+(103, 'Bob Wilson', 'Clerk', 101, 35000, 20),
+(104, 'Alice Brown', 'Salesman', 101, 45000, 30),
+(105, 'Charlie Davis', 'Manager', NULL, 70000, 20);
+
+-- Position table
+CREATE TABLE Position (
+    posno INT PRIMARY KEY,
+    posdesc VARCHAR(50),
+    posgrade VARCHAR(10)
+);
+
+-- Insert sample positions
+INSERT INTO Position VALUES 
+(1, 'Senior Management', 'A'),
+(2, 'Technical Analyst', 'B'),
+(3, 'Administrative Staff', 'C'),
+(4, 'Sales Executive', 'B');
+
+-- Duty allocation table
+CREATE TABLE Duty_alloc (
+    empno INT,
+    posno INT,
+    duty_hrs INT,
+    FOREIGN KEY (empno) REFERENCES Empl(empno),
+    FOREIGN KEY (posno) REFERENCES Position(posno)
+);
+
+-- Insert sample duty allocations
+INSERT INTO Duty_alloc VALUES 
+(101, 1, 40),
+(102, 2, 38),
+(103, 3, 35),
+(104, 4, 42),
+(105, 1, 40);
+
+ALTER TABLE Empl ADD COLUMN shift VARCHAR(10);
+
+UPDATE Empl SET shift = 'Morning' WHERE empno = 101;
+UPDATE Empl SET shift = 'Evening' WHERE empno = 102;
+UPDATE Empl SET shift = 'Morning' WHERE empno = 103;
+UPDATE Empl SET shift = 'Night'   WHERE empno = 104;
+UPDATE Empl SET shift = 'Evening' WHERE empno = 105;
+
+-- =====================================================
+-- 4️⃣ Queries
+-- =====================================================
+
+-- 1. Employees with salary greater than average salary
+SELECT e.ename, e.sal, e.job
+FROM Empl e
+WHERE e.sal > (SELECT AVG(sal) FROM Empl);
+
+-- 2. Employees earning more than any employee in department 20
+SELECT e.ename, e.sal, e.deptno
+FROM Empl e
+WHERE e.sal > ANY (SELECT sal FROM Empl WHERE deptno = 20);
+
+-- 3. Employees with salary between 40000 and 60000
+SELECT ename, sal, job
+FROM Empl
+WHERE sal BETWEEN 40000 AND 60000
+ORDER BY sal;
+
+-- 4. Create a VIEW for salary statistics by department
+CREATE VIEW Dept_Salary_Stats AS
+SELECT 
+    deptno,
+    COUNT(*) AS emp_count,
+    AVG(sal) AS avg_salary,
+    MAX(sal) AS max_salary,
+    MIN(sal) AS min_salary,
+    SUM(sal) AS total_salary
+FROM Empl
+GROUP BY deptno;
+
+-- Query the view
+SELECT * FROM Dept_Salary_Stats;
+
+-- 5. Count of employees in each shift
+SELECT shift, COUNT(*) AS employee_count
+FROM Empl
+GROUP BY shift
+ORDER BY employee_count DESC;
+
+-- 6. Employee details with position and shift info
+SELECT e.ename, e.job, e.sal, e.shift, p.posdesc, d.duty_hrs
+FROM Empl e
+INNER JOIN Duty_alloc d ON e.empno = d.empno
+INNER JOIN Position p ON d.posno = p.posno
+ORDER BY e.shift, e.ename;
+
+-- 7. Shift with maximum total salary
+SELECT shift, SUM(sal) AS total_shift_salary
+FROM Empl
+GROUP BY shift
+HAVING SUM(sal) = (
+    SELECT MAX(shift_total)
+    FROM (SELECT SUM(sal) AS shift_total FROM Empl GROUP BY shift) AS subq
+);
+
+-- 8. Employees working more than average duty hours
+SELECT e.ename, e.shift, d.duty_hrs
+FROM Empl e
+INNER JOIN Duty_alloc d ON e.empno = d.empno
+WHERE d.duty_hrs > (SELECT AVG(duty_hrs) FROM Duty_alloc);
+

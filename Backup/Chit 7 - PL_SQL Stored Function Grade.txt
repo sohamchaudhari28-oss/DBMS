@@ -1,0 +1,36 @@
+﻿Chit 7 — PL/SQL Stored Function (similar to Chit 6)
+
+
+Stored Function func_Grade:
+
+
+CREATE OR REPLACE FUNCTION func_Grade(p_marks IN NUMBER)
+RETURN VARCHAR2
+IS
+    v_class VARCHAR2(50);
+BEGIN
+    IF p_marks BETWEEN 990 AND 1500 THEN
+        v_class := 'Distinction';
+    ELSIF p_marks BETWEEN 900 AND 989 THEN
+        v_class := 'First Class';
+    ELSIF p_marks BETWEEN 825 AND 899 THEN
+        v_class := 'Higher Second Class';
+    ELSE
+        v_class := 'Other';
+    END IF;
+    RETURN v_class;
+END;
+/
+
+
+Usage PL/SQL Block:
+
+
+BEGIN
+    FOR rec IN (SELECT name, total_marks FROM Stud_Marks) LOOP
+        INSERT INTO Result_tab (Name, Class)
+        VALUES (rec.name, func_Grade(rec.total_marks));
+    END LOOP;
+    COMMIT;
+END;
+/

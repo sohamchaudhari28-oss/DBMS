@@ -1,0 +1,29 @@
+﻿Chit 12 — Database Trigger (Row level, AFTER trigger) — Library → Library_Audit (MySQL)
+
+
+AFTER UPDATE trigger:
+
+
+DELIMITER $$
+CREATE TRIGGER trg_library_after_update
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (action_type, action_time, book_id, title, author, publisher, issued_to, old_status)
+    VALUES ('UPDATE', NOW(), OLD.book_id, OLD.title, OLD.author, OLD.publisher, OLD.issued_to, OLD.status);
+END $$
+DELIMITER ;
+
+
+AFTER DELETE trigger:
+
+
+DELIMITER $$
+CREATE TRIGGER trg_library_after_delete
+AFTER DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (action_type, action_time, book_id, title, author, publisher, issued_to, old_status)
+    VALUES ('DELETE', NOW(), OLD.book_id, OLD.title, OLD.author, OLD.publisher, OLD.issued_to, OLD.status);
+END $$
+DELIMITER ;

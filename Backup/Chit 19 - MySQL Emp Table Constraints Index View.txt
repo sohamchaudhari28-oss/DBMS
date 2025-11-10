@@ -1,0 +1,37 @@
+﻿Chit 19 — MySQL emp table with constraints, add field Post, index, view
+
+CREATE DATABASE employee_db;
+USE employee_db;
+1. Create emp table with constraints and sequence start at 101:
+
+
+CREATE TABLE emp (
+    Eno INT PRIMARY KEY AUTO_INCREMENT,
+    Ename VARCHAR(100) NOT NULL,
+    Address VARCHAR(255) DEFAULT 'Nashik',
+    Joindate DATE,
+    Salary DECIMAL(12, 2)
+) AUTO_INCREMENT = 101;
+
+
+-- Add field Post:
+ALTER TABLE emp ADD COLUMN Post VARCHAR(100);
+
+
+-- Insert some data:
+INSERT INTO emp (Ename, Address, Joindate, Salary, Post)
+VALUES
+('Amit', 'Pune', '2020-01-01', 20000, 'Manager'),
+('Sachin', NULL, '2019-03-10', 18000, 'Clerk');
+
+
+-- Create index on Ename:
+CREATE INDEX idx_emp_ename ON emp (Ename);
+
+
+-- Create view on employee table to show only Ename and Salary:
+CREATE VIEW v_emp_salary AS
+SELECT Ename, Salary FROM emp;
+
+
+Note: Setting AUTO_INCREMENT = 101 makes first generated Eno = 101.

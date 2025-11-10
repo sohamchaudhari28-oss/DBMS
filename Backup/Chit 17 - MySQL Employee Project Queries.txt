@@ -1,0 +1,109 @@
+﻿Chit 17 — MySQL Employee & Project tables
+
+CREATE DATABASE company;
+USE company;
+
+
+CREATE TABLE Employee (
+    Emp_id INT PRIMARY KEY,
+    Ename VARCHAR(100),
+    City VARCHAR(100),
+    Salary DECIMAL(10, 2),
+    Commission DECIMAL(10, 2) NULL
+);
+
+
+CREATE TABLE Project (
+    Project_id INT PRIMARY KEY,
+    Project_name VARCHAR(100),
+    City VARCHAR(100)
+);
+
+
+INSERT INTO Employee VALUES
+(1, 'Amit', 'Pune', 20000, NULL),
+(2, 'Amit2', 'Mumbai', 25000, 500),
+(3, 'Rahul', 'Nasik', 30000, NULL),
+(4, 'Asha', 'Mumbai', 15000, NULL);
+
+
+1. Find different locations where employees belong:
+
+
+SELECT DISTINCT City FROM Employee;
+
+
+2. Maximum and minimum salary:
+
+
+SELECT MAX(Salary) AS max_salary, MIN(Salary) AS min_salary FROM Employee;
+
+
+3. Display content in ascending order of salary:
+
+
+SELECT * FROM Employee ORDER BY Salary ASC;
+
+
+4. Find employees who lived in Nasik or Pune:
+
+
+SELECT Ename FROM Employee WHERE City IN ('Nasik', 'Pune');
+
+
+5. Find employees who do not get commission:
+
+
+SELECT Ename FROM Employee WHERE Commission IS NULL;
+
+
+6. Change city of Amit to Nashik:
+
+
+UPDATE Employee SET City = 'Nashik' WHERE Ename = 'Amit';
+
+
+7. Find information of employees whose name starts with 'A':
+
+
+SELECT * FROM Employee WHERE Ename LIKE 'A%';
+
+
+8. Count of staff from Mumbai:
+
+
+SELECT COUNT(*) FROM Employee WHERE City = 'Mumbai';
+
+
+9. Count of staff from each city:
+
+
+SELECT City, COUNT(*) FROM Employee GROUP BY City;
+
+
+10. Find address where employees belong and where projects are:
+
+
+SELECT City FROM Employee
+UNION
+SELECT City FROM Project;
+
+
+11. City-wise minimum salary:
+
+
+SELECT City, MIN(Salary) FROM Employee GROUP BY City;
+
+
+12. City-wise maximum salary having maximum salary > 26000:
+
+
+SELECT City, MAX(Salary) as MaxSal FROM Employee
+GROUP BY City
+HAVING MAX(Salary) > 26000;
+
+
+13. Delete employee who has salary > 30,000:
+
+
+DELETE FROM Employee WHERE Salary > 30000;

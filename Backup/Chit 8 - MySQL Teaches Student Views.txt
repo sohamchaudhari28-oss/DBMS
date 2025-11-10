@@ -1,0 +1,42 @@
+﻿Chit 8 — MySQL (teaches, student, instructor, course)
+
+
+i. Find names of instructors who taught courses semester wise:
+
+
+SELECT i.name AS instructor, t.semester, t.year
+FROM instructor i
+JOIN teaches t ON i.T_ID = t.T_ID
+ORDER BY i.name, t.year, t.semester;
+
+
+ii. Create view on single table which retrieves student details:
+
+
+CREATE VIEW v_student_details AS
+SELECT S_ID, name, dept_name, tot_cred
+FROM student;
+
+
+iii. Rename column dept_name to department_name:
+
+
+ALTER TABLE student
+CHANGE COLUMN dept_name department_name VARCHAR(100);
+
+
+-- OR (Standard SQL):
+ALTER TABLE student
+RENAME COLUMN dept_name TO department_name;
+
+
+iv. Delete student name whose department is NULL:
+
+
+DELETE FROM student
+WHERE dept_name IS NULL;
+
+
+-- OR if column renamed:
+DELETE FROM student
+WHERE department_name IS NULL;

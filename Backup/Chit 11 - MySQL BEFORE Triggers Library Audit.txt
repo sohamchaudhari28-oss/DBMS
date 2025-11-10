@@ -1,0 +1,45 @@
+﻿Chit 11 — Database Trigger (Row-level, BEFORE trigger) — Library → Library_Audit (MySQL)
+
+
+Audit table:
+
+
+CREATE TABLE Library_Audit (
+    audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    action_type VARCHAR(10),
+    action_time DATETIME,
+    book_id INT,
+    title VARCHAR(255),
+    author VARCHAR(255),
+    publisher VARCHAR(255),
+    issued_to VARCHAR(100),
+    old_status VARCHAR(10)
+);
+
+
+BEFORE UPDATE trigger:
+
+
+DELIMITER $$
+CREATE TRIGGER trg_library_before_update
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (action_type, action_time, book_id, title, author, publisher, issued_to, old_status)
+    VALUES ('UPDATE', NOW(), OLD.book_id, OLD.title, OLD.author, OLD.publisher, OLD.issued_to, OLD.status);
+END $$
+DELIMITER ;
+
+
+BEFORE DELETE trigger:
+
+
+DELIMITER $$
+CREATE TRIGGER trg_library_before_delete
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+    INSERT INTO Library_Audit (action_type, action_time, book_id, title, author, publisher, issued_to, old_status)
+    VALUES ('DELETE', NOW(), OLD.book_id, OLD.title, OLD.author, OLD.publisher, OLD.issued_to, OLD.status);
+END $$
+DELIMITER ;

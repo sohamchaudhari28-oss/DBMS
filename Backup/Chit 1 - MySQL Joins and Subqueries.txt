@@ -1,0 +1,91 @@
+﻿Chit 1 — MySQL (Joins and Subqueries)
+CREATE DATABASE customer;
+
+use customer;
+  
+
+
+-- Create Customer table
+CREATE TABLE Customer (
+  C_Id INT PRIMARY KEY,
+  Cname VARCHAR(20),
+  City VARCHAR(20)
+);
+
+-- Insert rows into Customer
+INSERT INTO Customer VALUES
+(1, 'John', 'Nashik'),
+(2, 'Seema', 'Aurangabad'),
+(3, 'Amita', 'Nagar'),
+(4, 'Rakesh', 'Pune'),
+(5, 'Samata', 'Nashik'),
+(6, 'Ankita', 'Chandwad'),
+(7, 'Bhavika', 'Pune'),
+(8, 'Deepa', 'Mumbai'),
+(9, 'Nitin', 'Nagpur'),
+(10, 'Pooja', 'Pune');
+
+-- Create Account table
+CREATE TABLE Account (
+  C_Id INT,
+  Acc_Type VARCHAR(10),
+  Amount INT
+);
+
+-- Insert rows into Account
+INSERT INTO Account VALUES
+(1, 'Current', 5000),
+(2, 'Saving', 20000),
+(3, 'Saving', 70000),
+(4, 'Saving', 50000),
+(5, 'Current', 35000),
+(6, 'Loan', 30000),
+(7, 'Saving', 50000),
+(8, 'Saving', 50000),
+(9, 'Saving', 90000),
+(10, 'Loan', 8000),
+(11, 'Current', 45000);
+
+Q1: Show cname, Acc_Type, amount for customers with a Saving account.
+
+SELECT c.Cname, a.Acc_Type, a.Amount
+FROM Customer c
+JOIN Account a ON c.C_Id = a.C_Id
+WHERE a.Acc_Type = 'Saving';
+
+Q2: Display the data using Natural, Left and Right joins.
+
+Natural Join:
+
+SELECT * FROM Customer NATURAL JOIN Account;
+
+Left Join:
+SELECT * FROM Customer c LEFT JOIN Account a ON c.C_Id = a.C_Id;
+
+Right Join:
+SELECT * FROM Customer c RIGHT JOIN Account a ON c.C_Id = a.C_Id;
+
+Q3: Customers living in the same city as 'Pooja'.
+SELECT * FROM Customer 
+WHERE City = (SELECT City FROM Customer WHERE Cname = 'Pooja');
+
+Q4: Accounts with amount less than the average amount.
+SELECT * FROM Account 
+WHERE Amount < (SELECT AVG(Amount) FROM Account);
+
+Q5: C_id having maximum amount in account.
+SELECT C_id 
+FROM Account 
+WHERE Amount = (SELECT MAX(Amount) FROM Account);
+
+Q6: Amount and acc_type for customers whose amount is the minimum for their Acc_Type.
+SELECT a.C_id, a.Acc_Type, a.Amount 
+FROM Account a
+WHERE a.Amount = (
+  SELECT MIN(Amount) FROM Account WHERE Acc_Type = a.Acc_Type
+);
+
+Q7: Amounts greater than all (>) saving account amounts.
+SELECT Amount 
+FROM Account
+WHERE Amount > ALL (SELECT Amount FROM Account WHERE Acc_Type = 'Saving');

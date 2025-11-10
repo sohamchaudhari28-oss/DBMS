@@ -1,0 +1,38 @@
+﻿Chit 4 — MySQL terminal queries (student, instructor, course)
+
+
+Schemas:
+- student(S_ID,name,dept_name,tot_cred)
+- instructor(T_ID,name,dept_name,salary)
+- course(course_id,title,dept_name,credits)
+
+
+i. Find average salary where avg > 42000:
+SELECT dept_name, AVG(salary) AS avg_salary
+FROM instructor
+GROUP BY dept_name
+HAVING AVG(salary) > 42000;
+
+
+ii. Increase salary by 10% for computer dept:
+UPDATE instructor
+SET salary = salary * 1.10
+WHERE dept_name = 'computer';
+
+
+iii. Find names not 'Amol' nor 'Amit':
+SELECT name FROM instructor
+WHERE name NOT IN ('Amol', 'Amit');
+
+
+iv. Find names containing 'am':
+SELECT name FROM student
+WHERE LOWER(name) LIKE '%am%';
+
+
+v. Computer students taking DBMS:
+SELECT s.name
+FROM student s
+JOIN takes t ON s.S_ID = t.S_ID
+JOIN course c ON t.course_id = c.course_id
+WHERE s.dept_name = 'computer' AND c.title = 'DBMS';

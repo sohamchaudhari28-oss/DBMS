@@ -1,0 +1,46 @@
+﻿Chit 10 — Java + MongoDB connectivity (basic operations)
+
+
+Maven dependency (pom.xml):
+org.mongodb:mongodb-driver-sync:4.x
+
+
+import com.mongodb.client.*;
+import org.bson.Document;
+import static com.mongodb.client.model.Filters.eq;
+import com.mongodb.client.model.Updates;
+
+
+public class MongoJavaExample {
+    public static void main(String[] args) {
+        String uri = "mongodb://localhost:27017";
+        try (MongoClient mongoClient = MongoClients.create(uri)) {
+            
+            // 1. Create database
+            MongoDatabase db = mongoClient.getDatabase("Institute");
+            
+            // 2. Create collection
+            db.createCollection("students");
+            MongoCollection<Document> coll = db.getCollection("students");
+            
+            // 3. Insert document
+            Document doc = new Document("name", "Navin")
+                .append("roll", 1)
+                .append("age", 18);
+            coll.insertOne(doc);
+            
+            // 4. Display data
+            try (MongoCursor<Document> cur = coll.find().iterator()) {
+                while (cur.hasNext()) {
+                    System.out.println(cur.next().toJson());
+                }
+            }
+            
+            // 5. Remove document
+            coll.deleteOne(eq("roll", 1));
+            
+            // 6. Update document
+            coll.updateOne(eq("roll", 2), Updates.set("age", 20));
+        }
+    }
+}

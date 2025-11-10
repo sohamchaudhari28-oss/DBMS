@@ -1,0 +1,73 @@
+﻿Chit 20 — MongoDB Indexing & Aggregation (Student collection)
+
+
+Indexing:
+
+
+// 3. Single index:
+db.students.createIndex({ name: 1 });
+
+
+// 4. Compound index:
+db.students.createIndex({ subject: 1, marks: -1 });
+
+
+// 5. Unique index:
+db.students.createIndex({ Rollno: 1 }, { unique: true });
+
+
+// 6. Show index info:
+db.students.getIndexes();
+
+
+// 7. Remove index:
+db.students.dropIndex("subject_1_marks_-1");
+
+
+Aggregation functions on Student data:
+
+
+db.Student.insertMany([
+    { Rollno: 1, name: 'Navin', subject: 'DMSA', marks: 78 },
+    { Rollno: 2, name: 'anusha', subject: 'OSD', marks: 75 },
+    { Rollno: 3, name: 'ravi', subject: 'TOC', marks: 69 },
+    { Rollno: 4, name: 'veena', subject: 'TOC', marks: 70 },
+    { Rollno: 5, name: 'Pravini', subject: 'OSD', marks: 80 },
+    { Rollno: 6, name: 'Reena', subject: 'DMSA', marks: 50 },
+    { Rollno: 7, name: 'Geeta', subject: 'CN', marks: 90 },
+    { Rollno: 8, name: 'Akash', subject: 'CN', marks: 85 }
+]);
+
+
+// 1. Max marks of each subject:
+db.Student.aggregate([{ $group: { _id: "$subject", maxMarks: { $max: "$marks" } }}]);
+
+
+// 2. Min marks of each subject:
+db.Student.aggregate([{ $group: { _id: "$subject", minMarks: { $min: "$marks" } }}]);
+
+
+// 3. Sum marks of each subject:
+db.Student.aggregate([{ $group: { _id: "$subject", sumMarks: { $sum: "$marks" } }}]);
+
+
+// 4. Avg marks of each subject:
+db.Student.aggregate([{ $group: { _id: "$subject", avgMarks: { $avg: "$marks" } }}]);
+
+
+// 5. First record each subject:
+db.Student.aggregate([
+    { $sort: { Rollno: 1 } },
+    { $group: { _id: "$subject", firstRec: { $first: "$$ROOT" } }}
+]);
+
+
+// 6. Last record of each subject:
+db.Student.aggregate([
+    { $sort: { Rollno: 1 } },
+    { $group: { _id: "$subject", lastRec: { $last: "$$ROOT" } }}
+]);
+
+
+// 7/8. Count number of records of each subject:
+db.Student.aggregate([{ $group: { _id: "$subject", count: { $sum: 1 } }}]);

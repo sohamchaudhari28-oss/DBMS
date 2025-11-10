@@ -1,0 +1,90 @@
+﻿CHIT 24 - MySQL Empl Position Duty-alloc
+CREATE DATABASE empl_db;
+USE empl_db;
+
+-- 1. Create Empl table
+CREATE TABLE Empl (
+    empno INT PRIMARY KEY,
+    ename VARCHAR(50),
+    job VARCHAR(30),
+    mgr INT,
+    sal DECIMAL(10, 2),
+    deptno INT
+);
+
+
+-- Sample data for Empl
+INSERT INTO Empl VALUES (101, 'John Smith', 'Manager', NULL, 75000, 10);
+INSERT INTO Empl VALUES (102, 'Jane Doe', 'Analyst', 101, 55000, 10);
+INSERT INTO Empl VALUES (103, 'Bob Wilson', 'Clerk', 101, 35000, 20);
+INSERT INTO Empl VALUES (104, 'Alice Brown', 'Salesman', 101, 45000, 30);
+INSERT INTO Empl VALUES (105, 'Charlie Davis', 'Manager', NULL, 70000, 20);
+
+
+-- 2. Create Position table
+CREATE TABLE Position (
+    posno INT PRIMARY KEY,
+    posdesc VARCHAR(50),
+    posgrade VARCHAR(10)
+);
+
+
+-- Sample data for Position
+INSERT INTO Position VALUES (1, 'Senior Management', 'A');
+INSERT INTO Position VALUES (2, 'Technical Analyst', 'B');
+INSERT INTO Position VALUES (3, 'Administrative Staff', 'C');
+INSERT INTO Position VALUES (4, 'Sales Executive', 'B');
+
+
+-- 3. Create Duty_alloc table
+CREATE TABLE Duty_alloc (
+    empno INT,
+    posno INT,
+    duty_hrs INT,
+    FOREIGN KEY (empno) REFERENCES Empl(empno),
+    FOREIGN KEY (posno) REFERENCES Position(posno)
+);
+
+
+-- Sample data for Duty_alloc
+INSERT INTO Duty_alloc VALUES (101, 1, 40);
+INSERT INTO Duty_alloc VALUES (102, 2, 38);
+INSERT INTO Duty_alloc VALUES (103, 3, 35);
+INSERT INTO Duty_alloc VALUES (104, 4, 42);
+INSERT INTO Duty_alloc VALUES (105, 1, 40);
+
+
+-- 4. Display employee name, job, position description and duty hours
+SELECT e.ename, e.job, p.posdesc, d.duty_hrs
+FROM Empl e
+INNER JOIN Duty_alloc d ON e.empno = d.empno
+INNER JOIN Position p ON d.posno = p.posno;
+
+
+-- 5. Display all employees with their positions (including those without duty allocation)
+SELECT e.ename, e.job, p.posdesc, d.duty_hrs
+FROM Empl e
+LEFT JOIN Duty_alloc d ON e.empno = d.empno
+LEFT JOIN Position p ON d.posno = p.posno;
+
+
+-- 6. Find employees working more than 40 hours with their position details
+SELECT e.ename, e.job, p.posdesc, d.duty_hrs
+FROM Empl e
+INNER JOIN Duty_alloc d ON e.empno = d.empno
+INNER JOIN Position p ON d.posno = p.posno
+WHERE d.duty_hrs > 40;
+
+
+-- 7. Update duty hours for a specific employee
+UPDATE Duty_alloc d
+INNER JOIN Empl e ON d.empno = e.empno
+SET d.duty_hrs = 45
+WHERE e.ename = 'Bob Wilson';
+
+
+-- 8. Display total duty hours by position
+SELECT p.posdesc, SUM(d.duty_hrs) AS total_hours
+FROM Position p
+INNER JOIN Duty_alloc d ON p.posno = d.posno
+GROUP BY p.posdesc;

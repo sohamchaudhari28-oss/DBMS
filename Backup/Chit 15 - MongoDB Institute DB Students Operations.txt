@@ -1,0 +1,585 @@
+﻿// ============================================
+// MongoDB CRUD Operations - Institute Database
+// Collection: Students
+// ============================================
+
+
+// ============================================
+// 1. CREATE DATABASE AND SWITCH TO IT
+// ============================================
+use Institute;
+
+
+// Display current database
+db.getName();
+
+
+
+
+// ============================================
+// 2. CREATE COLLECTION
+// ============================================
+db.createCollection("Students");
+
+
+// Alternative: Collection is auto-created on first insert
+// db.Students (no need for explicit createCollection)
+
+
+
+
+// ============================================
+// 3. INSERT DOCUMENTS (CREATE)
+// ============================================
+
+
+// Insert multiple documents
+db.Students.insertMany([
+    { 
+        RollNo: 1, 
+        StudentName: "Aman", 
+        Age: 16, 
+        Branch: "Computer", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["cricket", "reading"] 
+    },
+    { 
+        RollNo: 2, 
+        StudentName: "Anita", 
+        Age: 17, 
+        Branch: "IT", 
+        Address: { City: "Mumbai", State: "MH" }, 
+        Hobbies: ["drawing", "dance"] 
+    },
+    { 
+        RollNo: 3, 
+        StudentName: "Ravi", 
+        Age: 16, 
+        Branch: "Computer", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["gaming"] 
+    },
+    { 
+        RollNo: 4, 
+        StudentName: "Sneha", 
+        Age: 15, 
+        Branch: "EX", 
+        Address: { City: "Nashik", State: "MH" }, 
+        Hobbies: ["music"] 
+    },
+    { 
+        RollNo: 5, 
+        StudentName: "Akash", 
+        Age: 18, 
+        Branch: "Computer", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["tennis", "reading"] 
+    },
+    { 
+        RollNo: 6, 
+        StudentName: "Asha", 
+        Age: 16, 
+        Branch: "IT", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["painting"] 
+    },
+    { 
+        RollNo: 7, 
+        StudentName: "Vikram", 
+        Age: 17, 
+        Branch: "Computer", 
+        Address: { City: "Nagpur", State: "MH" }, 
+        Hobbies: ["chess"] 
+    },
+    { 
+        RollNo: 8, 
+        StudentName: "Payal", 
+        Age: 15, 
+        Branch: "EX", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["dance"] 
+    },
+    { 
+        RollNo: 9, 
+        StudentName: "Arjun", 
+        Age: 16, 
+        Branch: "Computer", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["coding"] 
+    },
+    { 
+        RollNo: 10, 
+        StudentName: "Nidhi", 
+        Age: 17, 
+        Branch: "IT", 
+        Address: { City: "Mumbai", State: "MH" }, 
+        Hobbies: ["painting", "reading"] 
+    }
+]);
+
+
+// Insert single document
+db.Students.insertOne({ 
+    RollNo: 11, 
+    StudentName: "Rahul", 
+    Age: 18, 
+    Branch: "Computer", 
+    Address: { City: "Pune", State: "MH" }, 
+    Hobbies: ["football", "music"] 
+});
+
+
+
+
+// ============================================
+// 4. DISPLAY ALL STUDENTS (READ)
+// ============================================
+
+
+// Display all documents with formatting
+db.Students.find().pretty();
+
+
+// Display all documents (without pretty formatting)
+db.Students.find();
+
+
+
+
+// ============================================
+// 5. FIND STUDENTS WITH AGE > 15
+// ============================================
+
+
+db.Students.find({ Age: { $gt: 15 } });
+
+
+// With pretty formatting
+db.Students.find({ Age: { $gt: 15 } }).pretty();
+
+
+// Additional comparison operators:
+// $eq  - Equal to
+// $ne  - Not equal to
+// $gt  - Greater than
+// $gte - Greater than or equal to
+// $lt  - Less than
+// $lte - Less than or equal to
+
+
+// Examples:
+db.Students.find({ Age: { $gte: 16, $lte: 17 } }); // Age between 16 and 17
+db.Students.find({ Branch: { $ne: "Computer" } }); // Not Computer branch
+
+
+
+
+// ============================================
+// 6. DISPLAY STUDENTS SORTED BY NAME
+// ============================================
+
+
+// Sort ascending (A to Z)
+db.Students.find().sort({ StudentName: 1 });
+
+
+// Sort descending (Z to A)
+db.Students.find().sort({ StudentName: -1 });
+
+
+// Multiple field sorting
+db.Students.find().sort({ Branch: 1, Age: -1 });
+
+
+// Sort by Age descending
+db.Students.find().sort({ Age: -1 });
+
+
+
+
+// ============================================
+// 7. UPDATE OPERATIONS (UPDATE)
+// ============================================
+
+
+// Update single document - Change branch to Computer for RollNo 3
+db.Students.updateOne(
+    { RollNo: 3 }, 
+    { $set: { Branch: "Computer" } }
+);
+
+
+// Update multiple documents - Increase age by 1 for all Computer branch students
+db.Students.updateMany(
+    { Branch: "Computer" },
+    { $inc: { Age: 1 } }
+);
+
+
+// Add a new hobby to a student
+db.Students.updateOne(
+    { RollNo: 2 },
+    { $push: { Hobbies: "singing" } }
+);
+
+
+// Remove a hobby from a student
+db.Students.updateOne(
+    { RollNo: 2 },
+    { $pull: { Hobbies: "singing" } }
+);
+
+
+// Update nested document (Address)
+db.Students.updateOne(
+    { RollNo: 4 },
+    { $set: { "Address.City": "Pune" } }
+);
+
+
+// Replace entire document (keeps _id)
+db.Students.replaceOne(
+    { RollNo: 5 },
+    { 
+        RollNo: 5, 
+        StudentName: "Akash Kumar", 
+        Age: 19, 
+        Branch: "Computer", 
+        Address: { City: "Pune", State: "MH" }, 
+        Hobbies: ["tennis", "reading", "coding"] 
+    }
+);
+
+
+
+
+// ============================================
+// 8. DELETE OPERATIONS (DELETE)
+// ============================================
+
+
+// Delete single document with RollNo 1
+db.Students.deleteOne({ RollNo: 1 });
+
+
+// Delete multiple documents - Remove all students aged 15
+db.Students.deleteMany({ Age: 15 });
+
+
+// Delete all documents from collection (keeps collection structure)
+// db.Students.deleteMany({});
+
+
+
+
+// ============================================
+// 9. FIND STUDENTS WHOSE NAME STARTS WITH 'A'
+// ============================================
+
+
+// Using regex (case-insensitive)
+db.Students.find({ StudentName: { $regex: '^A', $options: 'i' } });
+
+
+// Case-sensitive
+db.Students.find({ StudentName: { $regex: '^A' } });
+
+
+// Name ends with 'a'
+db.Students.find({ StudentName: { $regex: 'a$', $options: 'i' } });
+
+
+// Name contains 'vi'
+db.Students.find({ StudentName: { $regex: 'vi', $options: 'i' } });
+
+
+
+
+// ============================================
+// 10. COUNT TOTAL NUMBER OF DOCUMENTS
+// ============================================
+
+
+// Count all documents
+db.Students.countDocuments();
+
+
+// Count with filter - Computer branch students
+db.Students.countDocuments({ Branch: "Computer" });
+
+
+// Count students from Pune
+db.Students.countDocuments({ "Address.City": "Pune" });
+
+
+// Deprecated method (still works but not recommended)
+// db.Students.count();
+
+
+
+
+// ============================================
+// 11. DISPLAY ONLY FIRST 5 DOCUMENTS (LIMIT)
+// ============================================
+
+
+db.Students.find().limit(5);
+
+
+// Limit with sorting
+db.Students.find().sort({ Age: -1 }).limit(5);
+
+
+// Top 3 oldest students
+db.Students.find().sort({ Age: -1 }).limit(3);
+
+
+
+
+// ============================================
+// 12. SKIP DOCUMENTS (PAGINATION)
+// ============================================
+
+
+// Skip first 0 documents (display all)
+db.Students.find().skip(0);
+
+
+// Skip first 5 documents
+db.Students.find().skip(5);
+
+
+// Pagination: Skip 5, show next 5 (Page 2)
+db.Students.find().skip(5).limit(5);
+
+
+// Page 3: Skip 10, show next 5
+db.Students.find().skip(10).limit(5);
+
+
+
+
+// ============================================
+// 13. QUERY NESTED DOCUMENTS - STUDENTS IN PUNE
+// ============================================
+
+
+// Find students living in Pune (show only name)
+db.Students.find(
+    { "Address.City": "Pune" }, 
+    { StudentName: 1, _id: 0 }
+);
+
+
+// Show name and city
+db.Students.find(
+    { "Address.City": "Pune" }, 
+    { StudentName: 1, "Address.City": 1, _id: 0 }
+);
+
+
+// Students from Mumbai
+db.Students.find({ "Address.City": "Mumbai" });
+
+
+// Students from MH state
+db.Students.find({ "Address.State": "MH" });
+
+
+
+
+// ============================================
+// 14. PROJECTION - DISPLAY SPECIFIC FIELDS
+// ============================================
+
+
+// Display only StudentName (exclude _id)
+db.Students.find({}, { StudentName: 1, _id: 0 });
+
+
+// Display Name and Age
+db.Students.find({}, { StudentName: 1, Age: 1, _id: 0 });
+
+
+// Display all except Hobbies
+db.Students.find({}, { Hobbies: 0 });
+
+
+// Display Name, Branch, and City
+db.Students.find({}, { 
+    StudentName: 1, 
+    Branch: 1, 
+    "Address.City": 1, 
+    _id: 0 
+});
+
+
+
+
+// ============================================
+// 15. ADDITIONAL USEFUL QUERIES
+// ============================================
+
+
+// 15a. Find students with specific hobby
+db.Students.find({ Hobbies: "reading" });
+
+
+// 15b. Find students with multiple hobbies (more than 1)
+db.Students.find({ Hobbies: { $exists: true, $not: { $size: 1 } } });
+
+
+// 15c. Students in Computer OR IT branch
+db.Students.find({ Branch: { $in: ["Computer", "IT"] } });
+
+
+// 15d. Students NOT in Computer branch
+db.Students.find({ Branch: { $nin: ["Computer"] } });
+
+
+// 15e. Students aged 16 or 17
+db.Students.find({ Age: { $in: [16, 17] } });
+
+
+// 15f. AND condition - Computer branch AND Age > 16
+db.Students.find({ 
+    $and: [
+        { Branch: "Computer" },
+        { Age: { $gt: 16 } }
+    ]
+});
+
+
+// Shorter syntax for AND
+db.Students.find({ Branch: "Computer", Age: { $gt: 16 } });
+
+
+// 15g. OR condition - Age < 16 OR Age > 17
+db.Students.find({ 
+    $or: [
+        { Age: { $lt: 16 } },
+        { Age: { $gt: 17 } }
+    ]
+});
+
+
+// 15h. Distinct values - All unique branches
+db.Students.distinct("Branch");
+
+
+// 15i. Distinct cities
+db.Students.distinct("Address.City");
+
+
+// 15j. Find one document
+db.Students.findOne({ Branch: "Computer" });
+
+
+// 15k. Check if field exists
+db.Students.find({ Hobbies: { $exists: true } });
+
+
+// 15l. Array size - Students with exactly 2 hobbies
+db.Students.find({ Hobbies: { $size: 2 } });
+
+
+// 15m. Element match in array
+db.Students.find({ Hobbies: { $elemMatch: { $eq: "reading" } } });
+
+
+
+
+// ============================================
+// 16. AGGREGATION EXAMPLES
+// ============================================
+
+
+// Count students by branch
+db.Students.aggregate([
+    { $group: { _id: "$Branch", count: { $sum: 1 } } }
+]);
+
+
+// Average age by branch
+db.Students.aggregate([
+    { $group: { _id: "$Branch", avgAge: { $avg: "$Age" } } }
+]);
+
+
+// Students grouped by city
+db.Students.aggregate([
+    { $group: { 
+        _id: "$Address.City", 
+        students: { $push: "$StudentName" },
+        count: { $sum: 1 }
+    }}
+]);
+
+
+
+
+// ============================================
+// 17. INDEX OPERATIONS
+// ============================================
+
+
+// Create index on RollNo
+db.Students.createIndex({ RollNo: 1 });
+
+
+// Create compound index
+db.Students.createIndex({ Branch: 1, Age: -1 });
+
+
+// View all indexes
+db.Students.getIndexes();
+
+
+// Drop specific index
+db.Students.dropIndex({ RollNo: 1 });
+
+
+
+
+// ============================================
+// 18. COLLECTION INFORMATION
+// ============================================
+
+
+// Get collection statistics
+db.Students.stats();
+
+
+// List all collections in database
+db.getCollectionNames();
+
+
+// Check if collection exists
+db.getCollectionNames().indexOf("Students") !== -1;
+
+
+
+
+// ============================================
+// 19. DROP COLLECTION
+// ============================================
+
+
+// Drop the Students collection
+db.Students.drop();
+
+
+// Verify collection is dropped
+db.getCollectionNames();
+
+
+
+
+// ============================================
+// 20. DROP DATABASE
+// ============================================
+
+
+// Drop entire Institute database
+// WARNING: This deletes all data permanently!
+// db.dropDatabase();

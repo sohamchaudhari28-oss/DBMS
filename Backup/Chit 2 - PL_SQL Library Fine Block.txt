@@ -1,0 +1,134 @@
+﻿-- ============================================
+-- Library Fine Calculator PL/SQL Block
+-- ============================================
+-- Schema:
+-- Borrower(Roll_no, Name, DateofIssue, NameofBook, Status)
+-- Fine(Roll_no, Date, Amt)
+-- Status: 'I' = Issued, 'R' = Returned
+-- ============================================
+
+
+SET SERVEROUTPUT ON;
+
+
+DECLARE
+    -- Input variables
+    v_roll Borrower.Roll_no%TYPE := &roll_no;
+    v_book Borrower.NameofBook%TYPE := '&book_name';
+    
+    -- Processing variables
+    v_name Borrower.Name%TYPE;
+    v_doi Borrower.DateofIssue%TYPE;
+    v_status Borrower.Status%TYPE;
+    v_days NUMBER;
+    v_fine_amt NUMBER := 0;
+    v_today DATE := TRUNC(SYSDATE);
+    
+    -- Custom exceptions
+    e_already_returned EXCEPTION;
+    e_invalid_status EXCEPTION;
+    
+BEGIN
+    -- Fetch borrower details
+    BEGIN
+        SELECT Name, DateofIssue, Status
+        INTO v_name, v_doi, v_status
+        FROM Borrower
+        WHERE Roll_no = v_roll 
+          AND NameofBook = v_book
+          AND Status = 'I';  -- Only issued books
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            -- Check if book was already returned
+            SELECT COUNT(*) INTO v_days
+            FROM Borrower
+            WHERE Roll_no = v_roll 
+              AND NameofBook = v_book 
+              AND Status = 'R';
+            
+            IF v_days > 0 THEN
+                RAISE e_already_returned;
+            ELSE
+                RAISE NO_DATA_FOUND;
+            END IF;
+    END;
+    
+    -- Calculate days borrowed
+    v_days := v_today - TRUNC(v_doi);
+    
+    -- Calculate fine based on days
+    IF v_days <= 15 THEN
+        -- No fine for first 15 days
+        v_fine_amt := 0;
+    ELSIF v_days BETWEEN 16 AND 30 THEN
+        -- Rs. 5 per day for days 16-30
+        v_fine_amt := (v_days - 15) * 5;
+    ELSE
+        -- Rs. 50 per day after 30 days
+        v_fine_amt := (15 * 5) + ((v_days - 30) * 50);
+    END IF;
+    
+    -- Update borrower status to 'R' (Returned)
+    UPDATE Borrower
+    SET Status = 'R'
+    WHERE Roll_no = v_roll 
+      AND NameofBook = v_book
+      AND Status = 'I';
+    
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Failed to update borrower status');
+    END IF;
+    
+    -- Insert fine record if applicable
+    IF v_fine_amt > 0 THEN
+        INSERT INTO Fine (Roll_no, Date, Amt)
+        VALUES (v_roll, v_today, v_fine_amt);
+        
+        DBMS_OUTPUT.PUT_LINE('======================================');
+        DBMS_OUTPUT.PUT_LINE('FINE DETAILS');
+        DBMS_OUTPUT.PUT_LINE('======================================');
+        DBMS_OUTPUT.PUT_LINE('Roll No      : ' || v_roll);
+        DBMS_OUTPUT.PUT_LINE('Name         : ' || v_name);
+        DBMS_OUTPUT.PUT_LINE('Book         : ' || v_book);
+        DBMS_OUTPUT.PUT_LINE('Issue Date   : ' || TO_CHAR(v_doi, 'DD-MON-YYYY'));
+        DBMS_OUTPUT.PUT_LINE('Return Date  : ' || TO_CHAR(v_today, 'DD-MON-YYYY'));
+        DBMS_OUTPUT.PUT_LINE('Days Borrowed: ' || v_days);
+        DBMS_OUTPUT.PUT_LINE('Fine Amount  : Rs. ' || v_fine_amt);
+        DBMS_OUTPUT.PUT_LINE('======================================');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('======================================');
+        DBMS_OUTPUT.PUT_LINE('Book returned successfully!');
+        DBMS_OUTPUT.PUT_LINE('Roll No      : ' || v_roll);
+        DBMS_OUTPUT.PUT_LINE('Name         : ' || v_name);
+        DBMS_OUTPUT.PUT_LINE('Book         : ' || v_book);
+        DBMS_OUTPUT.PUT_LINE('Days Borrowed: ' || v_days);
+        DBMS_OUTPUT.PUT_LINE('No fine applicable (within 15 days)');
+        DBMS_OUTPUT.PUT_LINE('======================================');
+    END IF;
+    
+    COMMIT;
+    
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('ERROR: No issued book found for Roll No ' || v_roll || 
+                           ' with Book Name "' || v_book || '"');
+        
+    WHEN e_already_returned THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('ERROR: This book has already been returned by Roll No ' || v_roll);
+        
+    WHEN TOO_MANY_ROWS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('ERROR: Multiple records found. Data integrity issue!');
+        
+    WHEN DUP_VAL_ON_INDEX THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('ERROR: Fine record already exists for this transaction');
+        
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('ERROR: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error Code: ' || SQLCODE);
+END;
+/
